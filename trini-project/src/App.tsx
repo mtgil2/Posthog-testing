@@ -10,26 +10,29 @@ export const App = () => {
   const [entries, setEntries] = useState<WorkEntry[]>([]);
   const [showForm, setShowForm] = useState(false);
 
+
   useEffect(() => {
     setEntries(getEntries());
   }, []);
 
   useEffect(() => {
     if (!posthog) return;
-    console.log('PostHog initialized');
 
     // Ensure feature flags are loaded
     posthog.onFeatureFlags(() => {
-      console.log('Feature flags loaded. "show-title" is:', posthog.isFeatureEnabled('show-title'));
+      console.log('Feature flags loaded');
+      console.log('  - "show-title":', posthog.isFeatureEnabled('show-title'));
+      console.log('  - "new-entry-button":', posthog.isFeatureEnabled('new-entry-button'));
     });
 
     // Reload flags on mount to get latest values
     posthog.reloadFeatureFlags();
   }, [posthog]);
 
-  // Check feature flag directly - most reactive approach
+  // Check feature flags directly - most reactive approach
   // Note: You may need to refresh the page after changing flags in PostHog dashboard
   const showTitle = posthog?.isFeatureEnabled('show-title') ?? false;
+  const showNewEntryButton = posthog?.isFeatureEnabled('new-entry-button') ?? false;
 
   const handleSubmit = (input: WorkEntryInput): void => {
     const newEntry: WorkEntry = {
@@ -51,7 +54,7 @@ export const App = () => {
     <div className="app">
       <header className="app-header">
         {showTitle && <h1 className="app-title">Buk Journal</h1>}
-        {!showForm && (
+        {!showForm && showNewEntryButton && (
           <button
             onClick={() => setShowForm(true)}
             className="btn btn-primary"
